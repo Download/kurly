@@ -1,0 +1,36 @@
+{
+  "name": "kurly",
+  "version": "0.0.2",
+  "description": "Pluggable templating engine for Node and browsers",
+  "main": "kurly.js",
+  "scripts": {
+    "test": "mocha *.spec.js",
+    "prepare": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/download/kurly.git"
+  },
+  "keywords": [
+    "kurly",
+    "1kb",
+    "template",
+    "ulog"
+  ],
+  "author": "Stijn de Witt",
+  "license": "CC-BY-4.0",
+  "bugs": {
+    "url": "https://github.com/download/kurly/issues"
+  },
+  "homepage": "https://github.com/download/kurly#readme",
+  "devDependencies": {
+    "anylogger-debug": "^0.7.0",
+    "chai": "^4.2.0",
+    "debug": "^4.1.1",
+    "mocha": "^6.1.4",
+    "sinon": "^7.3.2"
+  },
+  "dependencies": {
+    "anylogger": "^0.17.0"
+  }
+}
