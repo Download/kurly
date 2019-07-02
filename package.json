@@ -1,7 +1,7 @@
 {
   "name": "kurly",
-  "version": "0.0.2",
-  "description": "Pluggable templating engine for Node and browsers",
+  "version": "0.1.0",
+  "description": "Tiny pluggable templating engine for Node and browsers",
   "main": "kurly.js",
   "scripts": {
     "test": "mocha *.spec.js",
@@ -13,6 +13,7 @@
   },
   "keywords": [
     "kurly",
+    "tiny",
     "1kb",
     "template",
     "ulog"

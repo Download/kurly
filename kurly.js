@@ -2,7 +2,7 @@
  * kurly - Pluggable templating engine for Node and browsers
  * =========================================================
  * 
- * Kurly is a small and simple, yet powerful templating engine for node and browsers.
+ * `kurly` is a small, yet powerful templating engine for node and browsers.
  * It's templates are simple strings containing tags enclosed in curly braces.
  * Kurly only provides the parsing and compiling logic. You provide the tags.
  * 
@@ -64,7 +64,7 @@ var log = require('anylogger')('kurly')
 
 module.exports = {
   parse,
-  compile
+  compile,
 }
 
 /**
@@ -75,41 +75,26 @@ module.exports = {
  * 
  * @returns An array, possibly empty but never null or undefined.
  */
-function parse(str, tags) {
-  log.debug('parse', str, tags && Object.keys(tags).join(',') || tags)
-
+function parse(str) {
+  log.debug('parse', str)
   var result = [], error
   try {
     if (!str) return result
-
     if (process.env.NODE_ENV !== 'production') {
       if (typeof str != 'string') throw new Error('parameter `str` must be a string')
-      if ((tags === undefined) || (tags === null)) throw new Error('parameter `tags` is required')
-      if (typeof tags != 'object') throw new Error('parameter `tags` must be an object')
     }
-
     var tag, s = str, result = []
-    while ((tag = nextTag(s, tags)) !== null) {
-      var start = tag.idx + tag.name.length + 1
+    while (tag = nextTag(s)) {
       var before = s.substring(0, tag.idx)
-      if (before) {result.push(before)}
-      var skipped = s.substring(tag.idx, start)
-      var remaining = s.substring(start)
-      var body = tagBody(remaining)
-      if (body) {
-        result.push({
-          name: tag.name,
-          tag: tags[tag.name],
-          text: body.text,
-          ast: parse(body.text, tags)
-        })
-        s = remaining.substring(body.end + 1)
-      }
-      else { // invalid, return original text
-        result.push(skipped + remaining)
-      }
+      if (before) result.push(before)
+      result.push({
+        name: tag.name,
+        text: tag.text,
+        ast: parse(tag.text)
+      })
+      s = s.substring(tag.end + 1)
     }
-    if (s) {result.push(s)}
+    if (s) result.push(s)
     return result
   } catch(e) {
     error = e
@@ -119,157 +104,95 @@ function parse(str, tags) {
   }
 }
 
+
 /**
  * Compiles an abstract syntax tree into a function
  * 
- * @param {Array} ast An ast created with `parse`
+ * @param {Array<String|Object>} ast An abstract syntax tree created with `parse`
+ * @param {Object} tags An object of tags keyed by tag name
  * @param {Function} parent Optionally, a compiled parent function for the ast
  * 
  * @returns An array, possibly empty but never null or undefined.
  */
-function compile(ast, parent) {
-  log.debug('compile', ast, parent)
-
+function compile(ast, tags, parent) {
+  log.debug('compile', ast, tags && Object.keys(tags).join(',') || tags, parent)
+  var result, error
+  try {
+    if (process.env.NODE_ENV !== 'production') {
+      if ((ast === undefined) || (ast === null)) throw new Error('parameter `ast` is required')
+      if (! Array.isArray(ast)) throw new Error('parameter `ast` must be an array')
+      if ((tags === undefined) || (tags === null)) throw new Error('parameter `tags` is required')
+      if (typeof tags != 'object') throw new Error('parameter `tags` must be an object')
+    }
   // recursively compile the ast
-  var nodes = ast.map(n => typeof n == 'string' ? n : compile(n.ast, n.tag(n)))
-
-  // return a function that, when called, will render the result
-  return function(rec) {
-    var results = nodes.reduce(function(r, n){
-      if (typeof n == 'function') n = n(rec)
-      if (!Array.isArray(n)) n = [n]
-      r.push.apply(r, n)
-      return r
-    }, [])
-    // if we have a parent, invoke that and pass our results to it
-    return parent ? parent(rec, results) : results
+    var nodes = ast.map(n => 
+      typeof n == 'string' ? n : 
+      compile(n.ast, tags, 
+        tags[n.name] ? tags[n.name](n) :
+        tags['*'] ? tags['*'](n) : 
+        undefined
+      )
+    )
+    // return a function that, when called, will render the result
+    var result = function(rec) {
+      var results = nodes.reduce(function(r, n){
+        if (typeof n == 'function') n = n(rec)
+        if (!Array.isArray(n)) n = [n]
+        r.push.apply(r, n)
+        return r
+      }, [])
+      return parent ? parent(rec, results) : results
+    }
+    return result;
+  } catch(e){
+    error = e
+    throw e
+  } finally {
+    log.debug('compile', '=>', error ? error : result)
   }
 }
 
 
-const literal = ({ text }) => () => text
-
-
-function nextTag(str, tags) {
-  var next = {name:null, idx:-1}
-  Object.keys(tags).forEach(function(tag){
-		var exp = new RegExp('\\{' + escape(tag) + '.*\\}')
-		var idx = str.search(exp)
-		if ((idx !== -1) && ((next.idx === -1) || (idx < next.idx)) && (str[idx+tag.length+1])) {
-			next.idx = idx
-			next.name = tag
-		}
-  })
-	for (var i=0,tag; tag=tags[i]; i++) {
-		var exp = new RegExp(escape(tag)) // new RegExp(tag.replace('.', '\\.') + '{.*}')
-		var idx = str.search(exp)
-		if ((idx !== -1) && ((next.idx === -1) || (idx < next.idx)) && (str[idx+tag.length+1])) {
-			next.idx = idx
-			next.name = tag
-		}
-	}
-	return next.name ? next : null
-}
-
-function tagBody(str) {
-	// loop through the string, parsing it as we go through it
-	var result = {text:null, end:-1}
-	var inString=false
-	var esc = false
-	var open=0
-	var whitespace = /\s/
-	for (var i=0; i<str.length; i++) {
-		var token = str[i]
-		if (!inString) {
-			if (token === '{') {
-				open++
-			}
-			if (token === '}') {
-				if (!open) {
-					result.end = i
-					if (result.text && result.text[0] === '\'' && result.text[result.text.length-1] === '\'') {
-						result.text = result.text.substring(1, result.text.length-1)
-					}
-					return result
-				}
-				open--
-			}
-			if (token === '\'') {
-				inString = true
-				if (esc) {continue}
-			}
-			if (result.text===null && token.search(whitespace)===0) {continue}
-		}
-		else { // inString
-			if (token === '\'') {
-				inString = false
-				esc = true
-			}
-		}
-		if (result.text === null) {
-			result.text = ''
-		}
-		result.text += token
-		esc = false
-	}
-	return null
-}
-
-
-
-
-
-
-
-
-
-
-function convertQuotes(payload) {
-	if (!payload || typeof payload != 'string') {return payload}
-	var result = ''
-	var inString = false
-	var esc = false
-	for (var i=0; i<payload.length; i++) {
-		var token = payload[i]
-		if (inString) {
-			if (token === '\'') {
-				if (esc) {
-					// 2 consecutive quotes inside a string are escaped to a single quote
-					result += '\''
-					esc = false
-				}
-				else {
-					// encountered a quote... might be first of multiple, flag but do nothing yet
-					esc = true
-				}
-			}
-			else {
-				if (esc) {
-					// the previous quote stands on it's own, so it's a string terminator
-					result += '"'
-					inString = false
-				}
-				esc = false
-				result += token
-			}
-		}
-		else { // ! inString
-			if (token === '\'') {
-				result += '"'
-				inString = true
-			}
-			else {
-				result += token
-			}
-		}
-	}
-	if (esc) {
-		result += '"'
-	}
-	log.debug('convertQuotes(' + payload + ') ==> ', result)
-	return result
-}
-
-function escape(regex) {
-	return regex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+function nextTag(str) {
+  var match = str.match(/\{[_a-zA-Z][_a-zA-Z0-9]*([^_a-zA-Z0-9].*)?\}/)
+  if (!match) return
+  var s = match[0]
+  var name = match[1] ? s.substring(1, s.indexOf(match[1])) : s.substring(1, s.indexOf('}'))
+  log('nextTag', 'name', name, 'str', str, 'match', match)
+  var result = { name, idx: match.index, end: -1, text: '' }
+  // loop through the string, parsing it as we go through it
+  var esc = false
+  var open=1 // open brace at match.index 
+  for (var i=match.index+name.length+1; i<str.length; i++) {
+    var token = str[i]
+    if (esc) {
+      token = (token == 'n') ? '\n' :
+              (token == 't') ? '\t' :
+              (token == '{') ||
+              (token == '}') ||
+              (token == '\\') ? token :
+              '\\' + token // unrecognized escape sequence is ignored
+    }
+    else {
+      if (token === '{') {
+        open++
+      }
+      if (token === '}') {
+        open--
+        if (!open) {
+          result.end = i
+          return result
+        }
+      }
+      if (token === '\\') {
+        esc = true
+        continue
+      }
+      if (!result.text && (token.search(/\s/)===0)) {
+        continue
+      }
+    }
+    result.text += token
+    esc = false
+  }
 }

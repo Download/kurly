@@ -16,11 +16,8 @@ describe('API', () => {
       it('is a function', () => {
         expect(parse).to.be.a('function')
       })
-      it('accepts 2 arguments', () => {
-        expect(parse).property('length').to.equal(2)
-      })
-      it('throws when less than 2 arguments are provided', () => {
-        expect(() => parse('one')).to.throw()
+      it('accepts 1 argument', () => {
+        expect(parse).property('length').to.equal(1)
       })
       describe('str', () => {
         it('is a string', () => {
@@ -34,31 +31,34 @@ describe('API', () => {
           expect(() => parse(undefined, {})).to.not.throw()
         })
       })
-      describe('tags', () => {
-        it('is an object', () => {
-          expect(() => parse('string', {})).to.not.throw()
-          expect(() => parse('string', 'hi')).to.throw()
-          expect(() => parse('string', 8)).to.throw()
-        })
-      })
       it('returns an array', () => {
         expect(parse('string', {})).to.be.an('array')
       })
     })
     
-    describe('compile(ast, [parent])', () => {
+    describe('compile(ast, tags, [parent])', () => {
       it('is a function', () => {
         expect(compile).to.be.a('function')
       })
-      it('accepts 2 argument', () => {
-        expect(compile).property('length').to.equal(2)
+      it('accepts 3 argument', () => {
+        expect(compile).property('length').to.equal(3)
       })
       describe('ast', () => {
         it('is an array', () => {
-          expect(() => compile([])).to.not.throw()
+          expect(() => compile([],{})).to.not.throw()
         })
         it('is required', () => {
-          expect(() => compile()).to.throw()
+          expect(() => compile(null,{})).to.throw()
+        })
+      })
+      describe('tags', () => {
+        it('is an object', () => {
+          expect(() => compile([], {})).to.not.throw()
+          expect(() => compile([], 'hi')).to.throw()
+          expect(() => compile([], 8)).to.throw()
+        })
+        it('is required', () => {
+          expect(() => compile([], null)).to.throw()
         })
       })
       describe('parent', () => {
@@ -66,11 +66,11 @@ describe('API', () => {
           expect(() => compile([], {name:'test', tag:()=>{}, text:'{test}', children:[]})).to.not.throw()
         })
         it('is optional', () => {
-          expect(() => compile([])).to.not.throw()
+          expect(() => compile([],{})).to.not.throw()
         })
       })
       it('returns a function', () => {
-        expect(compile([])).to.be.a('function')
+        expect(compile([],{})).to.be.a('function')
       })
     })
   })
@@ -106,16 +106,16 @@ describe('API', () => {
   describe('Compiling', () => {
     it('creates a function', () => {
       var test = 'this is a {test}: {hello, {world}!}'
-      var expected = ['this is a ', 'TEST', ': ', 'Hello', ', ', 'World', '!']
+      var expected = ['this is a ', 'TEST', ': ', 'Hello', ', ', 'Earth', '!']
       var tags = {
         test: () => r => 'TEST',
         hello: () => (r,children) => ['Hello'].concat(children),
-        world: () => r => 'World',
+        world: () => ({planet='World'}) => planet,
       }
-      var parsed = parse(test, tags)
-      var compiled = compile(parsed)
+      var parsed = parse(test)
+      var compiled = compile(parsed, tags)
       expect(compiled).to.be.a('function')
-      var result = compiled()
+      var result = compiled({planet: 'Earth'})
       console.info('result', result)
       expect(result).to.deep.equal(expected)
     })
