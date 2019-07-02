@@ -36,14 +36,24 @@ import { parse, compile } from 'kurly'
 
 ## Use
 
+Call `parse` to parse text with tags denoted with curly braces into an abstract syntax tree:
+
 ```js
-var template = 'Hello, {kurly}'
-var tags = { 
-  kurly: () => () => 'World!'
-}
-var ast = parse(template)
-var template = compile(ast, tags)
-var result = template() // ['Hello, ', 'World!']
+var ast = parse('Hello, {kurly}')
+```
+
+Call `compile` with the ast and an object with tag functions (see [Tags](#tags)):
+
+```js
+var template = compile(ast, {
+  kurly: () => ({ planet }) => `${planet}!`
+})
+```
+
+Call the resulting function, passing it a record with parameters:
+
+```js
+var result = template({ planet: 'World' }) // ['Hello, ', 'World!']
 ```
 
 ## Tags
@@ -52,32 +62,34 @@ To create a kurly tag, we create a *higher order function*; a function that
 returns a function:
 
 ```js
-function outer() {
-  return function inner() {
-    return 'My first kurly tag!'
+function outer(cfg) {
+  return function inner(rec) {
+    return `My first ${rec.thing}`
   }
 }
 ```
 
-The outer function is called during the compilation phase and is passed a
-configuration object containing the tag name and function and an abstract 
-syntax tree of it's children (see [Nested tags](#nested tags)). 
+**The outer function** is called during the compilation phase. 
+It is passed a configuration object containing the tag name and function, 
+the tag content text and an abstract syntax tree of it's children 
+(see [Nested tags](#nested tags)).
 Any expensive work that needs to be done only once can be done here.
 
-The inner function is called during the render phase. It returns a(n array of)
-string(s). 
+**The inner function** is called during the render phase. 
+It returns a(n array of) string(s). It's argument is an object that 
+was initialized when the compiled function was called. One key is 
+always added to this object: `children`. This contains the
+rendered output of the children and can be used in the tag output.
 
 ### Nested tags
 Kurly supports nested tags:
 
 ```js
-var template = '{greeting, {kurly}}'
-var tags = { 
+var ast = parse('{greeting, {kurly}}')
+var template = compile(ast, { 
   greeting: () => ({ children }) => ['Hello'].concat(children),
   kurly: () => () => 'World!'
-}
-var ast = parse(template)
-var template = compile(ast, tags)
+})
 var result = template() // ['Hello', ', ', 'World!']
 ```
 

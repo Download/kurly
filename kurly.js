@@ -12,14 +12,8 @@
  * // The template
  * var str = "This is a {cool example of {sub} tags}"
  * 
- * // The user-provided tags
- * var tags = {
- *   cool: () => (record, children) => (['great'].concat(children)),
- *   sub: () => ({type}) => [`nested ${type}`]
- * }
- * 
  * // Use `parse` to parse the template into an AST
- * var parsed = parse(str, tags)
+ * var parsed = parse(str)
  * 
  * // parsed will look like:
  * // 
@@ -52,26 +46,17 @@
  * 
  * // results will look like:
  * // ['This is a ', 'great', ' example of ', 'nested kurly', ' tags']
- * 
- * // You can simply `join` this array to get a string:
- * var resultString = results.join('')
- * 
- * // resultString will look like:
- * // 'This is a great example of nested kurly tags'
  */
 
 var log = require('anylogger')('kurly')
 
-module.exports = {
-  parse,
-  compile,
-}
+module.exports.parse = parse
+module.exports.compile = compile
 
 /**
  * Parses a string with template tags in it into an abstract syntax tree.
  * 
  * @param {String} str The string to parse, may be null or undefined
- * @param {Object} tags An object with tag names as keys and tag functions as values
  * 
  * @returns An array, possibly empty but never null or undefined.
  */
@@ -104,6 +89,65 @@ function parse(str) {
   }
 }
 
+/**
+ * Finds the next tag in the given `str` and returns a record with the tag
+ * name, the index where it starts in the string, the index where it ends
+ * and the text contained in the body of the tag. 
+ * 
+ * @param {String} str The string to search in
+ * @returns {Object} The tag info object, or `undefined` if no tags were found.
+ */
+function nextTag(str) {
+  log.debug('nextTag', str)
+  var result
+  try {
+    var match = str.match(/\{[_a-zA-Z][_a-zA-Z0-9]*([^_a-zA-Z0-9].*)?\}/)
+    if (!match) return
+    var s = match[0]
+    var name = match[1] ? s.substring(1, s.indexOf(match[1])) : s.substring(1, s.indexOf('}'))
+    result = { name, idx: match.index, end: -1, text: '' }
+    // loop through the string, parsing it as we go through it
+    var esc = false
+    var open=1 // we already found one open brace
+    for (var i=match.index+name.length+1; i<str.length; i++) {
+      var token = str[i]
+      if (esc) {
+        token = (token == 'n') ? '\n' :
+                (token == 't') ? '\t' :
+                (token == '{') ||
+                (token == '}') ||
+                (token == '\\') ? token :
+                '\\' + token // unrecognized escape sequence is ignored
+      }
+      else {
+        if (token === '{') {
+          open++
+        }
+        if (token === '}') {
+          open--
+          if (!open) {
+            result.end = i
+            return result
+          }
+        }
+        if (token === '\\') {
+          esc = true
+          continue
+        }
+        if (!result.text && (token.search(/\s/)===0)) {
+          continue
+        }
+      }
+      result.text += token
+      esc = false
+    }
+  } catch(e) {
+    result = e
+  } finally {
+    log.debug('nextTag', '=>', result)
+  }
+}
+
 
 /**
  * Compiles an abstract syntax tree into a function
@@ -133,15 +177,20 @@ function compile(ast, tags, parent) {
         undefined
       )
     )
-    // return a function that, when called, will render the result
+    // create the result function
     var result = function(rec) {
-      var results = nodes.reduce(function(r, n){
+      // clone rec into res
+      var res = {}
+      for (k in rec) res[k] = rec[k]
+      // get the result children
+      res.children = nodes.reduce(function(r, n){
         if (typeof n == 'function') n = n(rec)
         if (!Array.isArray(n)) n = [n]
         r.push.apply(r, n)
         return r
       }, [])
-      return parent ? parent(rec, results) : results
+      // invoke parent if we have it
+      return parent ? parent(res) : res.children
     }
     return result;
   } catch(e){
@@ -153,46 +202,3 @@ function compile(ast, tags, parent) {
 }
 
 
-function nextTag(str) {
-  var match = str.match(/\{[_a-zA-Z][_a-zA-Z0-9]*([^_a-zA-Z0-9].*)?\}/)
-  if (!match) return
-  var s = match[0]
-  var name = match[1] ? s.substring(1, s.indexOf(match[1])) : s.substring(1, s.indexOf('}'))
-  log('nextTag', 'name', name, 'str', str, 'match', match)
-  var result = { name, idx: match.index, end: -1, text: '' }
-  // loop through the string, parsing it as we go through it
-  var esc = false
-  var open=1 // open brace at match.index 
-  for (var i=match.index+name.length+1; i<str.length; i++) {
-    var token = str[i]
-    if (esc) {
-      token = (token == 'n') ? '\n' :
-              (token == 't') ? '\t' :
-              (token == '{') ||
-              (token == '}') ||
-              (token == '\\') ? token :
-              '\\' + token // unrecognized escape sequence is ignored
-    }
-    else {
-      if (token === '{') {
-        open++
-      }
-      if (token === '}') {
-        open--
-        if (!open) {
-          result.end = i
-          return result
-        }
-      }
-      if (token === '\\') {
-        esc = true
-        continue
-      }
-      if (!result.text && (token.search(/\s/)===0)) {
-        continue
-      }
-    }
-    result.text += token
-    esc = false
-  }
-}
