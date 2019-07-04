@@ -3,4 +3,5 @@ node_js:
   - "node"
   - "8"
   - "6"
-  
+env:
+  - LOG=kurly,kurly:spec=LOG
