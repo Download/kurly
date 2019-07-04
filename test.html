@@ -1,0 +1,9 @@
+<script src="kurly.min.js"></script>
+<script>(function(){ // IIFE
+  var ast = kurly.parse('{noun} {verb} {adjective}!')
+  var tags = { '*': ({name}) => (rec) => `${rec[name]}` }
+  var template = kurly.compile(ast, tags)
+  var record = { noun: 'Kurly', verb: 'is', adjective: 'easy' }
+  var output = template(record)  // ['Kurly', ' ', 'is', ' ', 'easy', '!']
+  console.info(output.join('')) // > "Kurly is easy!"
+})()</script>

@@ -1,6 +1,6 @@
 {
   "name": "kurly",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Tiny pluggable templating engine for Node and browsers",
   "main": "kurly.js",
   "files": [
@@ -11,7 +11,7 @@
   "scripts": {
     "build": "node build.js",
     "test": "mocha *.spec.js",
-    "prepare": "npm run test && npm run build"
+    "prepare": "npm test && npm run build"
   },
   "repository": {
     "type": "git",

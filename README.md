@@ -1,6 +1,6 @@
-# kurly <sub><sup>0.3.0</sup></sub>
+# kurly <sub><sup>0.4.0</sup></sub>
 
-![kurly](kurly.png) 
+![kurly](kurly.png)
 
 ### Tiny pluggable templating engine for Node and browsers
 
@@ -14,9 +14,33 @@
 
 ![girly](girly.png)
 
-`kurly` is a tiny  ~[574](#gzip-size) bytes pluggable templating engine 
-for Node and browsers. It can parse templates with tags in curly braces 
-to an abstract syntax tree, which it can then compile into functions.
+`kurly` is a tiny  ~[574](#gzip-size) bytes pluggable templating engine for 
+Node and browsers. It can parse templates with tags in curly braces to  
+abstract syntax trees, which it can then compile into functions.
+
+
+## Download
+
+* [kurly.js](https://unpkg.com/kurly@0.4.0/kurly.js) 
+  (fully commented source ~5kB)
+* [kurly.min.js](https://unpkg.com/kurly@0.4.0/kurly.min.js) 
+  (~[574](#gzip-size) bytes minified and gzipped)
+
+
+## CDN
+
+*index.html*
+```html
+<script src="https://unpkg.com/kurly@0.4.0/kurly.min.js"></script>
+<script>(function(){ // IIFE
+  var ast = kurly.parse('{noun} {verb} {adjective}!')
+  var tags = { '*': ({name}) => (rec) => `${rec[name]}` }
+  var template = kurly.compile(ast, tags)
+  var record = { noun: 'Kurly', verb: 'is', adjective: 'easy' }
+  var output = template(record)  // ['Kurly', ' ', 'is', ' ', 'easy', '!']
+  console.info(output.join('')) // > "Kurly is easy!"
+})()</script>
+```
 
 
 ## Install
@@ -29,6 +53,12 @@ npm install --save kurly
 ## Require
 
 ```js
+// using ES5 syntax with CommonJS
+var kurly = require('kurly')
+var parse = kurly.parse
+var compile = kurly.compile 
+
+// or, using ES2015 with CommonJS
 var { parse, compile } = require('kurly')
 ```
 
@@ -36,15 +66,10 @@ var { parse, compile } = require('kurly')
 ## Import
 
 ```js
+// Using ES2015 import on Node or with Babel transpilation
 import { parse, compile } from 'kurly'
 ```
 
-## Download
-
-* [kurly.js](https://unpkg.com/kurly@0.3.0/kurly.js) 
-  (fully commented source ~5kB)
-* [kurly.min.js](https://unpkg.com/kurly@0.3.0/kurly.min.js) 
-  (~[574](#gzip-size) bytes minified and gzipped)
 
 ## Use
 
@@ -74,8 +99,8 @@ var result = template({ planet: 'World' }) // ['Hello, ', 'World!']
 `kurly` is just a tiny parser / compiler. Any functionality should be
 provided by tags. The way this works is simple: `kurly` parses and 
 finds tags during the `parse` phase and builds an ast. Then during
-`compile` it replaces the tags it found in the ast with the tag 
-functions it was given. 
+`compile` it replaces the tags it found in the ast with the tag
+functions it was given.
 
 ### Tag syntax
 `kurly` uses a regular expression to match tags:
@@ -86,19 +111,19 @@ functions it was given.
 
 This expression matches an open curly brace followed by an identifier
 and either some content text starting with a non-identifier character
-followed by a closing curly brace, or directly followed by a closing 
+followed by a closing curly brace, or directly followed by a closing
 curly brace.
 
 Tag identifiers can not contain any special characters such as punctuation,
-diacritics, whitespace, unicode symbols etc. They must start with an uppercase 
-or lowercase letter or the underscore and may be followed by zero or more 
+diacritics, whitespace, unicode symbols etc. They must start with an uppercase
+or lowercase letter or the underscore and may be followed by zero or more
 alphanumerical characters. Any text following the identifier is parsed and
 escaping is applied. A tag can contain a closing curly brace as content by 
-escaping it. The string `"a {tag with a closing curly brace \} in it}"` will 
+escaping it. The string `"a {tag with a closing curly brace \} in it}"` will
 be parsed correctly.
 
 ### Creating tags
-To create a kurly tag, we create a *higher order function*; a function that 
+To create a kurly tag, we create a *higher order function*; a function that
 returns a function:
 
 ```js
@@ -109,16 +134,16 @@ function outer(cfg) {
 }
 ```
 
-**The outer function** is called during the compilation phase. 
-It is passed a configuration object containing the tag name and function, 
-the tag content text and an abstract syntax tree of it's children 
+**The outer function** is called during the compilation phase.
+It is passed a configuration object containing the tag name and function,
+the tag content text and an abstract syntax tree of it's children
 (see [Nested tags](#nested-tags)).
 Any expensive work that needs to be done only once can be done here.
 
-**The inner function** is called during the render phase. 
-It returns a(n array of) string(s). It's argument is an object that 
-was initialized when the compiled function was called. One key is 
-always added to this object: `children`. This contains the
+**The inner function** is called during the render phase.
+It returns an (array of) output(s). The output entries can be any type. It's
+argument is an object that was initialized when the compiled function was
+called. One key is always added to this object: `children`. This contains the
 rendered output of the children and can be used in the tag output.
 
 ### Nested tags
