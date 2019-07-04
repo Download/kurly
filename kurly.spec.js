@@ -1,6 +1,8 @@
 require('anylogger-debug')
 var log = require('anylogger')('kurly:spec')
 var expect = require('chai').expect
+var sinon = require('sinon')
+var sandbox = sinon.createSandbox()
 var { parse, compile } = require('./')
 
 log('Starting tests')
@@ -133,7 +135,7 @@ describe('API', () => {
         var template = compile([], {})
         expect(template.length).to.equal(1)
       })
-      
+
       describe('rec', () => {
         it('is an object', () => {
           compile(parse('{test}'), {test:()=>(rec)=>{
@@ -141,6 +143,25 @@ describe('API', () => {
           }})
         })
       })
+    })
+  })
+
+  describe('Wildcard tag', () => {
+    it('is registered under the name \'*\'', () => {
+      var called, ast = parse('{test}')
+      var catchAll = () => () => (called = true)
+      var template = compile(ast, { '*': catchAll })
+      template()
+      expect(called).to.equal(true)
+    })
+
+    it('is called for unmatched tags', () => {
+      var ast = parse('{a}, {b}, {c}.')
+      var catchAll = ({name}) => ({greet}) => `${greet} ${name}`
+      var template = compile(ast, { '*': catchAll })
+      var result = template({ greet: 'Hi' })  
+      var expected = ['Hi a', ', ', 'Hi b', ', ', 'Hi c', '.']
+      expect(result).to.deep.equal(expected)
     })
   })
 

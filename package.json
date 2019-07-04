@@ -1,11 +1,17 @@
 {
   "name": "kurly",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Tiny pluggable templating engine for Node and browsers",
   "main": "kurly.js",
+  "files": [
+    "kurly.js",
+    "kurly.min.js",
+    "kurly.spec.js"
+  ],  
   "scripts": {
+    "build": "node build.js",
     "test": "mocha *.spec.js",
-    "prepare": "npm run test"
+    "prepare": "npm run test && npm run build"
   },
   "repository": {
     "type": "git",
@@ -14,8 +20,9 @@
   "keywords": [
     "kurly",
     "tiny",
-    "1kb",
     "template",
+    "parser",
+    "compiler",
     "ulog"
   ],
   "author": "Stijn de Witt",
@@ -28,10 +35,15 @@
     "anylogger-debug": "^0.7.0",
     "chai": "^4.2.0",
     "debug": "^4.1.1",
+    "gzip-size": "^5.1.1",
     "mocha": "^6.1.4",
-    "sinon": "^7.3.2"
+    "sinon": "^7.3.2",
+    "uglify-js": "^3.6.0"
   },
   "dependencies": {
     "anylogger": "^0.17.0"
+  },
+  "peerDependencies": {
+    "anylogger": ">=0.17.0"
   }
 }

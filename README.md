@@ -1,4 +1,6 @@
-![kurly](kurly.png)
+# kurly <sub><sup>0.3.0</sup></sub>
+
+![kurly](kurly.png) 
 
 ### Tiny pluggable templating engine for Node and browsers
 
@@ -12,9 +14,10 @@
 
 ![girly](girly.png)
 
-`kurly` is a tiny pluggable templating engine for Node and browsers. It can 
-parse templates with tags in curly braces to an abstract syntax tree, which 
-it can then compile into functions.
+`kurly` is a tiny  ~[574](#gzip-size) bytes pluggable templating engine 
+for Node and browsers. It can parse templates with tags in curly braces 
+to an abstract syntax tree, which it can then compile into functions.
+
 
 ## Install
 
@@ -22,17 +25,26 @@ it can then compile into functions.
 npm install --save kurly
 ```
 
+
 ## Require
 
 ```js
 var { parse, compile } = require('kurly')
 ```
 
+
 ## Import
 
 ```js
 import { parse, compile } from 'kurly'
 ```
+
+## Download
+
+* [kurly.js](https://unpkg.com/kurly@0.3.0/kurly.js) 
+  (fully commented source ~5kB)
+* [kurly.min.js](https://unpkg.com/kurly@0.3.0/kurly.min.js) 
+  (~[574](#gzip-size) bytes minified and gzipped)
 
 ## Use
 
@@ -56,8 +68,36 @@ Call the resulting function, passing it a record with parameters:
 var result = template({ planet: 'World' }) // ['Hello, ', 'World!']
 ```
 
+
 ## Tags
 
+`kurly` is just a tiny parser / compiler. Any functionality should be
+provided by tags. The way this works is simple: `kurly` parses and 
+finds tags during the `parse` phase and builds an ast. Then during
+`compile` it replaces the tags it found in the ast with the tag 
+functions it was given. 
+
+### Tag syntax
+`kurly` uses a regular expression to match tags:
+
+```js
+/\{[_a-zA-Z][_a-zA-Z0-9]*([^_a-zA-Z0-9].*)?\}/
+```
+
+This expression matches an open curly brace followed by an identifier
+and either some content text starting with a non-identifier character
+followed by a closing curly brace, or directly followed by a closing 
+curly brace.
+
+Tag identifiers can not contain any special characters such as punctuation,
+diacritics, whitespace, unicode symbols etc. They must start with an uppercase 
+or lowercase letter or the underscore and may be followed by zero or more 
+alphanumerical characters. Any text following the identifier is parsed and
+escaping is applied. A tag can contain a closing curly brace as content by 
+escaping it. The string `"a {tag with a closing curly brace \} in it}"` will 
+be parsed correctly.
+
+### Creating tags
 To create a kurly tag, we create a *higher order function*; a function that 
 returns a function:
 
@@ -72,7 +112,7 @@ function outer(cfg) {
 **The outer function** is called during the compilation phase. 
 It is passed a configuration object containing the tag name and function, 
 the tag content text and an abstract syntax tree of it's children 
-(see [Nested tags](#nested tags)).
+(see [Nested tags](#nested-tags)).
 Any expensive work that needs to be done only once can be done here.
 
 **The inner function** is called during the render phase. 
@@ -97,10 +137,42 @@ For a tag to support nesting, it should pick up it's children and add them
 to the result it is returning. In the example above, `greeting` is adding
 it's children to the array it is returning using `concat`.
 
+### Wildcard tag
+You can register a wildcard / catch-all tag under the name `'*'` that will 
+be called for everything that matches the tag syntax, but for which no 
+registered tag was found:
+
+```js
+var ast = parse('{a}, {b}, {c}.')
+var catchAll = ({name}) => ({greet}) => `${greet} ${name}`
+var template = compile(ast, { '*': catchAll })
+var result = template({ greet: 'Hi' })  
+// result: ['Hi a', ', ', 'Hi b', ', ', 'Hi c', '.']
+```
+
+### Tag return value
+A tag may return just about anything. Eventually, all the return values of
+all the tags will end up in a flattened array, which is returned by the 
+template function, together with all the unmatched text, in the right order.
+
+If you need the end result to be a string and all your tags are returning
+(arrays of) strings, you can convert the template result to a string like
+this:
+
+```js
+result = result.join('')
+```
+
+### Share your tags
+Created a nice tag and want to share it with the world?
+Publish it to NPM! Make sure to include the keyword `"kurly"` in your 
+`package,json` so it will show up in the list of 
+[projects related to kurly](https://www.npmjs.com/search?q=keywords:kurly).
+
 
 ## Issues
 
-Add an issue in the [issue tracker](https://github.com/download/ulog/issues)
+Add an issue in the [issue tracker](https://github.com/download/kurly/issues)
 to let me know of any problems you find, or questions you may have.
 
 

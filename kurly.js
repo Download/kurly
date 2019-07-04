@@ -37,21 +37,29 @@
  * // ]
  * //
  * 
- * // Use `compile` to compile an AST into a function
- * var execute = compile(ast)
+ * // Use `compile` to compile an AST into a template function
+ * var template = compile(ast, {
+ *   // the 'cool' tag supports nesting via the `children` parameter
+ *   cool: () => ({children}) => ['great'].concat(children),
+ *   // the 'sub' tag uses a parameter `type`
+ *   sub: () => ({type}) => `nested ${type}`
+ * })
  * 
  * // Call the function! You may supply a context object as the first parameter 
  * // and it will be available in all the tags
- * var results = execute({ type: 'kurly'})
+ * var results = template({ type: 'kurly'})
  * 
  * // results will look like:
  * // ['This is a ', 'great', ' example of ', 'nested kurly', ' tags']
  */
+module.exports = {
+  parse: parse,
+  compile: compile,
+}
 
-var log = require('anylogger')('kurly')
-
-module.exports.parse = parse
-module.exports.compile = compile
+if (process.env.DEBUG || process.env.LOG) {
+  var log = require('anylogger')('kurly')
+}
 
 /**
  * Parses a string with template tags in it into an abstract syntax tree.
@@ -61,32 +69,31 @@ module.exports.compile = compile
  * @returns An array, possibly empty but never null or undefined.
  */
 function parse(str) {
-  log.debug('parse', str)
-  var result = [], error
-  try {
-    if (!str) return result
-    if (process.env.NODE_ENV !== 'production') {
-      if (typeof str != 'string') throw new Error('parameter `str` must be a string')
-    }
-    var tag, s = str, result = []
-    while (tag = nextTag(s)) {
-      var before = s.substring(0, tag.idx)
-      if (before) result.push(before)
-      result.push({
-        name: tag.name,
-        text: tag.text,
-        ast: parse(tag.text)
-      })
-      s = s.substring(tag.end + 1)
-    }
-    if (s) result.push(s)
-    return result
-  } catch(e) {
-    error = e
-    throw e
-  } finally {
-    log.debug('parse', '=>', error ? error : result)
+  if (process.env.DEBUG || process.env.LOG) {
+    log.debug('parse', str)
   }
+  var result = []
+  if (!str) return result
+  if (process.env.DEBUG || process.env.LOG) {
+    if (typeof str != 'string') 
+      throw new Error('parameter `str` must be a string')
+  }
+  var tag
+  while (tag = nextTag(str)) {
+    var before = str.substring(0, tag.index)
+    if (before) result.push(before)
+    result.push({
+      name: tag.name,
+      text: tag.text,
+      ast: parse(tag.text)
+    })
+    str = str.substring(tag.end + 1)
+  }
+  if (str) result.push(str)
+  if (process.env.DEBUG || process.env.LOG) {
+    log.debug('parse', '=>', result)
+  }
+  return result
 }
 
 /**
@@ -98,53 +105,50 @@ function parse(str) {
  * @returns {Object} The tag info object, or `undefined` if no tags were found.
  */
 function nextTag(str) {
-  log.debug('nextTag', str)
-  var result
-  try {
-    var match = str.match(/\{[_a-zA-Z][_a-zA-Z0-9]*([^_a-zA-Z0-9].*)?\}/)
-    if (!match) return
-    var s = match[0]
-    var name = match[1] ? s.substring(1, s.indexOf(match[1])) : s.substring(1, s.indexOf('}'))
-    result = { name, idx: match.index, end: -1, text: '' }
-    // loop through the string, parsing it as we go through it
-    var esc = false
-    var open=1 // we already found one open brace
-    for (var i=match.index+name.length+1; i<str.length; i++) {
-      var token = str[i]
-      if (esc) {
-        token = (token == 'n') ? '\n' :
-                (token == 't') ? '\t' :
-                (token == '{') ||
-                (token == '}') ||
-                (token == '\\') ? token :
-                '\\' + token // unrecognized escape sequence is ignored
-      }
-      else {
-        if (token === '{') {
-          open++
-        }
-        if (token === '}') {
-          open--
-          if (!open) {
-            result.end = i
-            return result
-          }
-        }
-        if (token === '\\') {
-          esc = true
-          continue
-        }
-        if (!result.text && (token.search(/\s/)===0)) {
-          continue
-        }
-      }
-      result.text += token
-      esc = false
+  if (process.env.DEBUG || process.env.LOG) {
+    log.debug('nextTag', str)
+  }
+  var match = str.match(/\{[_a-zA-Z][_a-zA-Z0-9]*([^_a-zA-Z0-9].*)?\}/)
+  if (!match) return
+  var name = match[1] ? match[0].substring(1, match[0].indexOf(match[1])) : match[0].substring(1, match[0].indexOf('}'))
+  var result = { name: name, index: match.index, end: -1, text: '' }
+  // loop through the string, parsing it as we go through it
+  var esc = false
+  var open=1 // we already found one open brace
+  for (var i=match.index+name.length+1; i<str.length; i++) {
+    var token = str[i]
+    if (esc) {
+      token = (token == 'n') ? '\n' :
+              (token == 't') ? '\t' :
+              (token == '{') ||
+              (token == '}') ||
+              (token == '\\') ? token :
+              '\\' + token // unrecognized escape sequence is ignored
     }
-  } catch(e) {
-    result = e
-  } finally {
-    log.debug('nextTag', '=>', result)
+    else {
+      if (token === '{') {
+        open++
+      }
+      if (token === '}') {
+        open--
+        if (!open) {
+          result.end = i
+          if (process.env.DEBUG || process.env.LOG) {
+            log.debug('nextTag', '=>', result)
+          }
+          return result
+        }
+      }
+      if (token === '\\') {
+        esc = true
+        continue
+      }
+      if (!result.text && (token.search(/\s/)===0)) {
+        continue
+      }
+    }
+    result.text += token
+    esc = false
   }
 }
 
@@ -159,46 +163,44 @@ function nextTag(str) {
  * @returns An array, possibly empty but never null or undefined.
  */
 function compile(ast, tags, parent) {
-  log.debug('compile', ast, tags && Object.keys(tags).join(',') || tags, parent)
-  var result, error
-  try {
-    if (process.env.NODE_ENV !== 'production') {
-      if ((ast === undefined) || (ast === null)) throw new Error('parameter `ast` is required')
-      if (! Array.isArray(ast)) throw new Error('parameter `ast` must be an array')
-      if ((tags === undefined) || (tags === null)) throw new Error('parameter `tags` is required')
-      if (typeof tags != 'object') throw new Error('parameter `tags` must be an object')
-    }
-  // recursively compile the ast
-    var nodes = ast.map(n => 
-      typeof n == 'string' ? n : 
-      compile(n.ast, tags, 
-        tags[n.name] ? tags[n.name](n) :
-        tags['*'] ? tags['*'](n) : 
-        undefined
-      )
-    )
-    // create the result function
-    var result = function(rec) {
-      // clone rec into res
-      var res = {}
-      for (k in rec) res[k] = rec[k]
-      // get the result children
-      res.children = nodes.reduce(function(r, n){
-        if (typeof n == 'function') n = n(rec)
-        if (!Array.isArray(n)) n = [n]
-        r.push.apply(r, n)
-        return r
-      }, [])
-      // invoke parent if we have it
-      return parent ? parent(res) : res.children
-    }
-    return result;
-  } catch(e){
-    error = e
-    throw e
-  } finally {
-    log.debug('compile', '=>', error ? error : result)
+  if (process.env.DEBUG || process.env.LOG) {
+    log.debug('compile', ast, tags && Object.keys(tags).join(',') || tags, parent)
+    if ((ast === undefined) || (ast === null)) throw new Error('parameter `ast` is required')
+    if (! Array.isArray(ast)) throw new Error('parameter `ast` must be an array')
+    if ((tags === undefined) || (tags === null)) throw new Error('parameter `tags` is required')
+    if (typeof tags != 'object') throw new Error('parameter `tags` must be an object')
   }
+
+  // recursively compile the ast
+  var nodes = ast.map(function(n){ 
+    return typeof n == 'string' 
+        ? n : 
+        compile(n.ast, tags, 
+          tags[n.name] ? tags[n.name](n) :
+          tags['*'] ? tags['*'](n) : 
+          undefined
+        )
+  })
+
+  // create the result function
+  var result = function(rec) {
+    // clone rec into res
+    var res = {}
+    for (k in rec) res[k] = rec[k]
+    // get the result children
+    res.children = nodes.reduce(function(r, n){
+      if (typeof n == 'function') n = n(rec)
+      if (!Array.isArray(n)) n = [n]
+      r.push.apply(r, n)
+      return r
+    }, [])
+    // invoke parent if we have it
+    return parent ? parent(res) : res.children
+  }
+  if (process.env.DEBUG || process.env.LOG) {
+    log.debug('compile', '=>', result)
+  }
+  return result;
 }
 
 
