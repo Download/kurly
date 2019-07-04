@@ -1,6 +1,6 @@
 {
   "name": "kurly",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Tiny pluggable templating engine for Node and browsers",
   "main": "kurly.js",
   "files": [
