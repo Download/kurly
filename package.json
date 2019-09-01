@@ -41,7 +41,7 @@
     "uglify-js": "^3.6.0"
   },
   "dependencies": {
-    "anylogger": "^0.17.0"
+    "anylogger": "^0.18.0"
   },
   "peerDependencies": {
     "anylogger": ">=0.17.0"
