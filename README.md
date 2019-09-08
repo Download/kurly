@@ -1,4 +1,4 @@
-# kurly <sub><sup>0.5.1</sup></sub>
+# kurly <sub><sup>0.6.0</sup></sub>
 
 ![kurly](kurly.png)
 
@@ -21,9 +21,9 @@ abstract syntax trees, which it can then compile into functions.
 
 ## Download
 
-* [kurly.js](https://unpkg.com/kurly@0.5.1/kurly.js) 
+* [kurly.js](https://unpkg.com/kurly@0.6.0/kurly.js) 
   (fully commented source ~7kB)
-* [kurly.min.js](https://unpkg.com/kurly@0.5.1/kurly.min.js) 
+* [kurly.min.js](https://unpkg.com/kurly@0.6.0/kurly.min.js) 
   (~[583](#gzip-size) bytes minified and gzipped)
 
 
@@ -31,7 +31,7 @@ abstract syntax trees, which it can then compile into functions.
 
 *index.html*
 ```html
-<script src="https://unpkg.com/kurly@0.5.1/kurly.min.js"></script>
+<script src="https://unpkg.com/kurly@0.6.0/kurly.min.js"></script>
 <script>(function(){ // IIFE
   var ast = kurly.parse('{noun} {verb} {adjective}!')
   var tags = { '*': ({name}) => (rec) => `${rec[name]}` }
