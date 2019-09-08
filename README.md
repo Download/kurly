@@ -15,14 +15,14 @@
 ![girly](girly.png)
 
 `kurly` is a tiny  ~[574](#gzip-size) bytes pluggable templating engine for 
-Node and browsers. It can parse templates with tags in curly braces to  
+Node and browsers. It can parse templates with tags in curly braces to
 abstract syntax trees, which it can then compile into functions.
 
 
 ## Download
 
 * [kurly.js](https://unpkg.com/kurly@0.5.1/kurly.js) 
-  (fully commented source ~5kB)
+  (fully commented source ~7kB)
 * [kurly.min.js](https://unpkg.com/kurly@0.5.1/kurly.min.js) 
   (~[574](#gzip-size) bytes minified and gzipped)
 
@@ -209,3 +209,11 @@ Copyright 2019 by [Stijn de Witt](https://stijndewitt.com). Some rights reserved
 ## License
 
 Licensed under the [Creative Commons Attribution 4.0 International (CC-BY-4.0)](https://creativecommons.org/licenses/by/4.0/) Open Source license.
+
+
+## gzip-size
+
+The GZIP algorithm is available in different flavours and with different 
+possible compression settings. The sizes quoted in this README have been
+measured using [gzip-size](https://npmjs.com/package/gzip-size) 
+by [Sindre Sorhus](https://github.com/sindresorhus), your mileage may vary.
