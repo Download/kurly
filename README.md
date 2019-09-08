@@ -7,7 +7,7 @@
 [![npm](https://img.shields.io/npm/v/kurly.svg)](https://npmjs.com/package/kurly)
 [![license](https://img.shields.io/npm/l/kurly.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![travis](https://img.shields.io/travis/Download/kurly.svg)](https://travis-ci.org/Download/kurly)
-[![greenkeeper](https://img.shields.io/david/Download/kurly.svg)](https://greenkeeper.io/)
+[![greenkeeper](https://img.shields.io/david/Download/kurly.svg)](https://greenkeeper.io/) [![Greenkeeper badge](https://badges.greenkeeper.io/Download/kurly.svg)](https://greenkeeper.io/)
 ![mind BLOWN](https://img.shields.io/badge/mind-BLOWN-ff69b4.svg)
 
 <sup><sub><sup><sub>.</sub></sup></sub></sup>
