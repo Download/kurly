@@ -13,7 +13,7 @@ try {
   log.info(`Read ${srcFile} (${data.length} bytes)`)
 
   data = data.replace('module.exports', `this.${pkg.name}`)
-  data = data.replace(/process\.env\.DEBUG \|\| process\.env\.LOG/g, `false`)
+  data = data.replace(/process\.env\.NODE_ENV != 'production'/g, `false`)
   data = `(function(){${data}})()`
   log.info(`Bundled ${srcFile} (${data.length} bytes)`)
 

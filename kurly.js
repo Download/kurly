@@ -57,7 +57,7 @@ module.exports = {
   compile: compile,
 }
 
-if (process.env.DEBUG || process.env.LOG) {
+if (process.env.NODE_ENV != 'production') {
   var log = require('anylogger')('kurly')
 }
 
@@ -69,29 +69,28 @@ if (process.env.DEBUG || process.env.LOG) {
  * @returns An array, possibly empty but never null or undefined.
  */
 function parse(str) {
-  if (process.env.DEBUG || process.env.LOG) {
+  if (process.env.NODE_ENV != 'production') {
     log.debug('parse', str)
   }
-  var result = []
-  if (!str) return result
-  if (process.env.DEBUG || process.env.LOG) {
-    if (typeof str != 'string') 
-      throw new Error('parameter `str` must be a string')
+  var tag, result = []
+  if ((str !== null) && (str !== undefined)) {
+    if (process.env.NODE_ENV != 'production') {
+      if (typeof str != 'string') throw new TypeError('`str` is not a string: ' + typeof str)
+    }
+    while (tag = nextTag(str)) {
+      var before = str.substring(0, tag.index)
+      if (before) result.push(before)
+      result.push({
+        name: tag.name,
+        text: tag.text,
+        ast: parse(tag.text)
+      })
+      str = str.substring(tag.end + 1)
+    }
+    if (str) result.push(str)
   }
-  var tag
-  while (tag = nextTag(str)) {
-    var before = str.substring(0, tag.index)
-    if (before) result.push(before)
-    result.push({
-      name: tag.name,
-      text: tag.text,
-      ast: parse(tag.text)
-    })
-    str = str.substring(tag.end + 1)
-  }
-  if (str) result.push(str)
-  if (process.env.DEBUG || process.env.LOG) {
-    log.debug('parse', '=>', result)
+  if (process.env.NODE_ENV != 'production') {
+    log('parse', str, '=>', result)
   }
   return result
 }
@@ -105,51 +104,54 @@ function parse(str) {
  * @returns {Object} The tag info object, or `undefined` if no tags were found.
  */
 function nextTag(str) {
-  if (process.env.DEBUG || process.env.LOG) {
+  if (process.env.NODE_ENV != 'production') {
     log.debug('nextTag', str)
   }
   var match = str.match(/\{[_a-zA-Z][_a-zA-Z0-9]*([^_a-zA-Z0-9].*)?\}/)
-  if (!match) return
-  var name = match[1] ? match[0].substring(1, match[0].indexOf(match[1])) : match[0].substring(1, match[0].indexOf('}'))
-  var result = { name: name, index: match.index, end: -1, text: '' }
-  // loop through the string, parsing it as we go through it
-  var esc = false
-  var open=1 // we already found one open brace
-  for (var i=match.index+name.length+1; i<str.length; i++) {
-    var token = str[i]
-    if (esc) {
-      token = (token == 'n') ? '\n' :
-              (token == 't') ? '\t' :
-              (token == '{') ||
-              (token == '}') ||
-              (token == '\\') ? token :
-              '\\' + token // unrecognized escape sequence is ignored
-    }
-    else {
-      if (token === '{') {
-        open++
+  var result
+  if (match) {
+    var name = match[1] ? match[0].substring(1, match[0].indexOf(match[1])) : match[0].substring(1, match[0].indexOf('}'))
+    result = { name: name, index: match.index, end: -1, text: '' }
+    // loop through the string, parsing it as we go through it
+    var esc = false
+    var open=1 // we already found one open brace
+    for (var i=match.index+name.length+1; i<str.length; i++) {
+      var token = str[i]
+      if (esc) {
+        token = (token == 'n') ? '\n' :
+                (token == 't') ? '\t' :
+                (token == '{') ||
+                (token == '}') ||
+                (token == '\\') ? token :
+                '\\' + token // unrecognized escape sequence is ignored
       }
-      if (token === '}') {
-        open--
-        if (!open) {
-          result.end = i
-          if (process.env.DEBUG || process.env.LOG) {
-            log.debug('nextTag', '=>', result)
+      else {
+        if (token === '{') {
+          open++
+        }
+        if (token === '}') {
+          open--
+          if (!open) {
+            result.end = i
+            break
           }
-          return result
+        }
+        if (token === '\\') {
+          esc = true
+          continue
+        }
+        if (!result.text && (token.search(/\s/)===0)) {
+          continue
         }
       }
-      if (token === '\\') {
-        esc = true
-        continue
-      }
-      if (!result.text && (token.search(/\s/)===0)) {
-        continue
-      }
+      result.text += token
+      esc = false
     }
-    result.text += token
-    esc = false
   }
+  if (process.env.NODE_ENV != 'production') {
+    log('nextTag', str, '=>', result)
+  }
+  return result
 }
 
 
@@ -163,8 +165,8 @@ function nextTag(str) {
  * @returns An array, possibly empty but never null or undefined.
  */
 function compile(ast, tags, parent) {
-  if (process.env.DEBUG || process.env.LOG) {
-    log.debug('compile', ast, tags && Object.keys(tags).join(',') || tags, parent)
+  if (process.env.NODE_ENV != 'production') {
+    log.debug('compile', ast, tags, parent)
     if ((ast === undefined) || (ast === null)) throw new Error('parameter `ast` is required')
     if (! Array.isArray(ast)) throw new Error('parameter `ast` must be an array')
     if ((tags === undefined) || (tags === null)) throw new Error('parameter `tags` is required')
@@ -190,15 +192,14 @@ function compile(ast, tags, parent) {
     // get the result children
     res.children = nodes.reduce(function(r, n){
       if (typeof n == 'function') n = n(rec)
-      if (!Array.isArray(n)) n = [n]
-      r.push.apply(r, n)
+      r.push.apply(r, Array.isArray(n) ? n : [n])
       return r
     }, [])
     // invoke parent if we have it
     return parent ? parent(res) : res.children
   }
-  if (process.env.DEBUG || process.env.LOG) {
-    log.debug('compile', '=>', result)
+  if (process.env.NODE_ENV != 'production') {
+    log('compile', ast, tags, parent, '=>', '[Function]')
   }
   return result;
 }
