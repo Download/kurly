@@ -44,6 +44,6 @@
     "sinon": "^7.4.2"
   },
   "peerDependencies": {
-    "anylogger": ">=0.17.0"
+    "anylogger": ">=0.18.0"
   }
 }
