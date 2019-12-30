@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/download/kurly#readme",
   "devDependencies": {
-    "anylogger-debug": "^0.7.0",
+    "anylogger-debug": "^0.8.0",
     "chai": "^4.2.0",
     "debug": "^4.1.1",
     "gzip-size": "^5.1.1",
