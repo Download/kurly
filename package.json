@@ -41,7 +41,7 @@
   "dependencies": {
     "anylogger": "^0.18.0",
     "mocha": "^6.2.0",
-    "sinon": "^7.4.2"
+    "sinon": "^8.0.2"
   },
   "peerDependencies": {
     "anylogger": ">=0.18.0"
