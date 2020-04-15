@@ -36,7 +36,7 @@
     "chai": "^4.2.0",
     "debug": "^4.1.1",
     "gzip-size": "^5.1.1",
-    "uglify-js": "^3.6.0"
+    "uglify-js": "^3.9.1"
   },
   "dependencies": {
     "anylogger": "^0.18.0",
