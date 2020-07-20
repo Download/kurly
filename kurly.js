@@ -104,9 +104,6 @@ function parse(str) {
  * @returns {Object} The tag info object, or `undefined` if no tags were found.
  */
 function nextTag(str) {
-  if (process.env.NODE_ENV != 'production') {
-    log.debug('nextTag', str)
-  }
   var match = str.match(/\{[_a-zA-Z][_a-zA-Z0-9]*([^_a-zA-Z0-9].*)?\}/)
   var result
   if (match) {
@@ -147,9 +144,6 @@ function nextTag(str) {
       result.text += token
       esc = false
     }
-  }
-  if (process.env.NODE_ENV != 'production') {
-    log('nextTag', str, '=>', result)
   }
   return result
 }
