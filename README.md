@@ -202,7 +202,7 @@ to let me know of any problems you find, or questions you may have.
 
 ## Copyright
 
-Copyright 2019 by [Stijn de Witt](https://stijndewitt.com). Some rights reserved.
+Copyright 2020 by [Stijn de Witt](https://stijndewitt.com). Some rights reserved.
 
 
 ## License
