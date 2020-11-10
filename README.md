@@ -1,11 +1,11 @@
-# kurly <sub><sup>0.7.0</sup></sub>
+# kurly <sub><sup>1.0.0</sup></sub>
 
 ![kurly](kurly.png)
 
 ### Tiny pluggable templating engine for Node and browsers
 
 [![npm](https://img.shields.io/npm/v/kurly.svg)](https://npmjs.com/package/kurly)
-[![license](https://img.shields.io/npm/l/kurly.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![license](https://img.shields.io/npm/l/kurly.svg)](https://opensource.org/licenses/MIT)
 [![travis](https://img.shields.io/travis/Download/kurly.svg)](https://travis-ci.org/Download/kurly)
 ![mind BLOWN](https://img.shields.io/badge/mind-BLOWN-ff69b4.svg)
 
@@ -13,16 +13,16 @@
 
 ![girly](girly.png)
 
-`kurly` is a tiny  ~[577](#gzip-size) bytes pluggable templating engine for 
+`kurly` is a tiny  ~[577](#gzip-size) bytes pluggable templating engine for
 Node and browsers. It can parse templates with tags in curly braces to
 abstract syntax trees, which it can then compile into functions.
 
 
 ## Download
 
-* [kurly.js](https://unpkg.com/kurly@0.7.0/kurly.js) 
+* [kurly.js](https://unpkg.com/kurly@1.0.0/kurly.js)
   (fully commented source ~7kB)
-* [kurly.min.js](https://unpkg.com/kurly@0.7.0/kurly.min.js) 
+* [kurly.min.js](https://unpkg.com/kurly@1.0.0/kurly.min.js)
   (~[577](#gzip-size) bytes minified and gzipped)
 
 
@@ -30,7 +30,7 @@ abstract syntax trees, which it can then compile into functions.
 
 *index.html*
 ```html
-<script src="https://unpkg.com/kurly@0.7.0/kurly.min.js"></script>
+<script src="https://unpkg.com/kurly@1.0.0/kurly.min.js"></script>
 <script>(function(){ // IIFE
   var ast = kurly.parse('{noun} {verb} {adjective}!')
   var tags = { '*': ({name}) => (rec) => `${rec[name]}` }
@@ -55,7 +55,7 @@ npm install --save kurly
 // using ES5 syntax with CommonJS
 var kurly = require('kurly')
 var parse = kurly.parse
-var compile = kurly.compile 
+var compile = kurly.compile
 
 // or, using ES2015 with CommonJS
 var { parse, compile } = require('kurly')
@@ -96,7 +96,7 @@ var result = template({ planet: 'World' }) // ['Hello, ', 'World!']
 ## Tags
 
 `kurly` is just a tiny parser / compiler. Any functionality should be
-provided by tags. The way this works is simple: `kurly` parses and 
+provided by tags. The way this works is simple: `kurly` parses and
 finds tags during the `parse` phase and builds an ast. Then during
 `compile` it replaces the tags it found in the ast with the tag
 functions it was given.
@@ -117,7 +117,7 @@ Tag identifiers can not contain any special characters such as punctuation,
 diacritics, whitespace, unicode symbols etc. They must start with an uppercase
 or lowercase letter or the underscore and may be followed by zero or more
 alphanumerical characters. Any text following the identifier is parsed and
-escaping is applied. A tag can contain a closing curly brace as content by 
+escaping is applied. A tag can contain a closing curly brace as content by
 escaping it. The string `"a {tag with a closing curly brace \} in it}"` will
 be parsed correctly.
 
@@ -150,7 +150,7 @@ Kurly supports nested tags:
 
 ```js
 var ast = parse('{greeting, {kurly}}')
-var template = compile(ast, { 
+var template = compile(ast, {
   greeting: () => ({ children }) => ['Hello'].concat(children),
   kurly: () => () => 'World!'
 })
@@ -162,21 +162,21 @@ to the result it is returning. In the example above, `greeting` is adding
 it's children to the array it is returning using `concat`.
 
 ### Wildcard tag
-You can register a wildcard / catch-all tag under the name `'*'` that will 
-be called for everything that matches the tag syntax, but for which no 
+You can register a wildcard / catch-all tag under the name `'*'` that will
+be called for everything that matches the tag syntax, but for which no
 registered tag was found:
 
 ```js
 var ast = parse('{a}, {b}, {c}.')
 var catchAll = ({name}) => ({greet}) => `${greet} ${name}`
 var template = compile(ast, { '*': catchAll })
-var result = template({ greet: 'Hi' })  
+var result = template({ greet: 'Hi' })
 // result: ['Hi a', ', ', 'Hi b', ', ', 'Hi c', '.']
 ```
 
 ### Tag return value
 A tag may return just about anything. Eventually, all the return values of
-all the tags will end up in a flattened array, which is returned by the 
+all the tags will end up in a flattened array, which is returned by the
 template function, together with all the unmatched text, in the right order.
 
 If you need the end result to be a string and all your tags are returning
@@ -189,8 +189,8 @@ result = result.join('')
 
 ### Share your tags
 Created a nice tag and want to share it with the world?
-Publish it to NPM! Make sure to include the keyword `"kurly"` in your 
-`package,json` so it will show up in the list of 
+Publish it to NPM! Make sure to include the keyword `"kurly"` in your
+`package,json` so it will show up in the list of
 [projects related to kurly](https://www.npmjs.com/search?q=keywords:kurly).
 
 
@@ -202,17 +202,17 @@ to let me know of any problems you find, or questions you may have.
 
 ## Copyright
 
-Copyright 2020 by [Stijn de Witt](https://stijndewitt.com). Some rights reserved.
+Copyright 2020 by [Stijn de Witt](https://stijndewitt.com).
 
 
 ## License
 
-Licensed under the [Creative Commons Attribution 4.0 International (CC-BY-4.0)](https://creativecommons.org/licenses/by/4.0/) Open Source license.
+Licensed under the [MIT](https://opensource.org/licenses/MIT) Open Source license.
 
 
 ## gzip-size
 
-The GZIP algorithm is available in different flavours and with different 
+The GZIP algorithm is available in different flavours and with different
 possible compression settings. The sizes quoted in this README have been
-measured using [gzip-size](https://npmjs.com/package/gzip-size) 
+measured using [gzip-size](https://npmjs.com/package/gzip-size)
 by [Sindre Sorhus](https://github.com/sindresorhus), your mileage may vary.

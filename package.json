@@ -1,6 +1,6 @@
 {
   "name": "kurly",
-  "version": "0.7.0",
+  "version": "1.0.0",
   "description": "Tiny pluggable templating engine for Node and browsers",
   "main": "kurly.js",
   "files": [
@@ -26,7 +26,7 @@
     "ulog"
   ],
   "author": "Stijn de Witt",
-  "license": "CC-BY-4.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/download/kurly/issues"
   },
@@ -34,13 +34,13 @@
   "devDependencies": {
     "anylogger-debug": "^1.0.1",
     "chai": "^4.2.0",
-    "debug": "^4.1.1",
+    "debug": "^4.2.0",
     "gzip-size": "^5.1.1",
-    "mocha": "^8.0.1",
-    "sinon": "^9.0.2",
-    "uglify-js": "^3.10.0"
+    "mocha": "^8.2.1",
+    "sinon": "^9.2.1",
+    "uglify-js": "^3.11.5"
   },
   "dependencies": {
-    "anylogger": "^1.0.4"
+    "anylogger": "^1.0.5"
   }
 }
