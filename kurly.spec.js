@@ -1,8 +1,6 @@
-require('anylogger-debug')
+require('ulog')
 var log = require('anylogger')('kurly:spec')
 var expect = require('chai').expect
-var sinon = require('sinon')
-var sandbox = sinon.createSandbox()
 var { parse, compile } = require('./')
 
 log('Starting tests')
@@ -84,7 +82,7 @@ describe('API', () => {
       })
     })
   })
-  
+
   describe('compile(ast, tags, [parent]) => template', () => {
     it('is a function', () => {
       expect(compile).to.be.a('function')
@@ -159,7 +157,7 @@ describe('API', () => {
       var ast = parse('{a}, {b}, {c}.')
       var catchAll = ({name}) => ({greet}) => `${greet} ${name}`
       var template = compile(ast, { '*': catchAll })
-      var result = template({ greet: 'Hi' })  
+      var result = template({ greet: 'Hi' })
       var expected = ['Hi a', ', ', 'Hi b', ', ', 'Hi c', '.']
       expect(result).to.deep.equal(expected)
     })

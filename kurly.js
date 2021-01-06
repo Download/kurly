@@ -1,42 +1,42 @@
 /**
  * kurly - Pluggable templating engine for Node and browsers
  * =========================================================
- * 
+ *
  * `kurly` is a small, yet powerful templating engine for node and browsers.
  * It's templates are simple strings containing tags enclosed in curly braces.
  * Kurly only provides the parsing and compiling logic. You provide the tags.
- * 
+ *
  * Example
  * -------
- * 
+ *
  * // The template
  * var str = "This is a {cool example of {sub} tags}"
- * 
+ *
  * // Use `parse` to parse the template into an AST
  * var parsed = parse(str)
- * 
+ *
  * // parsed will look like:
- * // 
+ * //
  * // [
- * //   'This is a ', 
+ * //   'This is a ',
  * //   {
- * //     name: cool, 
- * //     tag: function(){..}, 
- * //     text: ' example of {sub} tags', 
+ * //     name: cool,
+ * //     tag: function(){..},
+ * //     text: ' example of {sub} tags',
  * //     ast: [
- * //       ' example of ', 
+ * //       ' example of ',
  * //       {
  * //         name: 'sub',
  * //         tag: function(){..},
  * //         text: null,
  * //         ast: []
- * //       }, 
+ * //       },
  * //       ' tags'
  * //     ]
  * //   }
  * // ]
  * //
- * 
+ *
  * // Use `compile` to compile an AST into a template function
  * var template = compile(ast, {
  *   // the 'cool' tag supports nesting via the `children` parameter
@@ -44,11 +44,11 @@
  *   // the 'sub' tag uses a parameter `type`
  *   sub: () => ({type}) => `nested ${type}`
  * })
- * 
- * // Call the function! You may supply a context object as the first parameter 
+ *
+ * // Call the function! You may supply a context object as the first parameter
  * // and it will be available in all the tags
  * var results = template({ type: 'kurly'})
- * 
+ *
  * // results will look like:
  * // ['This is a ', 'great', ' example of ', 'nested kurly', ' tags']
  */
@@ -63,9 +63,9 @@ if (process.env.NODE_ENV != 'production') {
 
 /**
  * Parses a string with template tags in it into an abstract syntax tree.
- * 
+ *
  * @param {String} str The string to parse, may be null or undefined
- * 
+ *
  * @returns An array, possibly empty but never null or undefined.
  */
 function parse(str) {
@@ -73,7 +73,7 @@ function parse(str) {
     log.debug('parse', str)
   }
   var tag, result = []
-  if ((str !== null) && (str !== undefined)) {
+  if (str || (str === '')) {
     if (process.env.NODE_ENV != 'production') {
       if (typeof str != 'string') throw new TypeError('`str` is not a string: ' + typeof str)
     }
@@ -98,8 +98,8 @@ function parse(str) {
 /**
  * Finds the next tag in the given `str` and returns a record with the tag
  * name, the index where it starts in the string, the index where it ends
- * and the text contained in the body of the tag. 
- * 
+ * and the text contained in the body of the tag.
+ *
  * @param {String} str The string to search in
  * @returns {Object} The tag info object, or `undefined` if no tags were found.
  */
@@ -151,11 +151,11 @@ function nextTag(str) {
 
 /**
  * Compiles an abstract syntax tree into a function
- * 
+ *
  * @param {Array<String|Object>} ast An abstract syntax tree created with `parse`
  * @param {Object} tags An object of tags keyed by tag name
  * @param {Function} parent Optionally, a compiled parent function for the ast
- * 
+ *
  * @returns An array, possibly empty but never null or undefined.
  */
 function compile(ast, tags, parent) {
@@ -168,12 +168,12 @@ function compile(ast, tags, parent) {
   }
 
   // recursively compile the ast
-  var nodes = ast.map(function(n){ 
-    return typeof n == 'string' 
-        ? n : 
-        compile(n.ast, tags, 
+  var nodes = ast.map(function(n){
+    return typeof n == 'string'
+        ? n :
+        compile(n.ast, tags,
           tags[n.name] ? tags[n.name](n) :
-          tags['*'] ? tags['*'](n) : 
+          tags['*'] ? tags['*'](n) :
           undefined
         )
   })

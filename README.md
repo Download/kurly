@@ -1,4 +1,4 @@
-# kurly <sub><sup>1.0.0</sup></sub>
+# kurly <sub><sup>1.0.1</sup></sub>
 
 ![kurly](kurly.png)
 
@@ -13,24 +13,24 @@
 
 ![girly](girly.png)
 
-`kurly` is a tiny  ~[577](#gzip-size) bytes pluggable templating engine for
+`kurly` is a tiny  ~[576](#gzip-size) bytes pluggable templating engine for
 Node and browsers. It can parse templates with tags in curly braces to
 abstract syntax trees, which it can then compile into functions.
 
 
 ## Download
 
-* [kurly.js](https://unpkg.com/kurly@1.0.0/kurly.js)
+* [kurly.js](https://unpkg.com/kurly@1.0.1/kurly.js)
   (fully commented source ~7kB)
-* [kurly.min.js](https://unpkg.com/kurly@1.0.0/kurly.min.js)
-  (~[577](#gzip-size) bytes minified and gzipped)
+* [kurly.min.js](https://unpkg.com/kurly@1.0.1/kurly.min.js)
+  (~[576](#gzip-size) bytes minified and gzipped)
 
 
 ## CDN
 
 *index.html*
 ```html
-<script src="https://unpkg.com/kurly@1.0.0/kurly.min.js"></script>
+<script src="https://unpkg.com/kurly@1.0.1/kurly.min.js"></script>
 <script>(function(){ // IIFE
   var ast = kurly.parse('{noun} {verb} {adjective}!')
   var tags = { '*': ({name}) => (rec) => `${rec[name]}` }

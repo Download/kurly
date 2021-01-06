@@ -1,6 +1,6 @@
 {
   "name": "kurly",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tiny pluggable templating engine for Node and browsers",
   "main": "kurly.js",
   "files": [
@@ -32,15 +32,13 @@
   },
   "homepage": "https://github.com/download/kurly#readme",
   "devDependencies": {
-    "anylogger-debug": "^1.0.1",
     "chai": "^4.2.0",
-    "debug": "^4.2.0",
-    "gzip-size": "^5.1.1",
+    "gzip-size": "^6.0.0",
     "mocha": "^8.2.1",
-    "sinon": "^9.2.1",
-    "uglify-js": "^3.11.5"
+    "uglify-js": "^3.12.4",
+    "ulog": "^2.0.0-beta.10"
   },
   "dependencies": {
-    "anylogger": "^1.0.5"
+    "anylogger": "^1.0.10"
   }
 }

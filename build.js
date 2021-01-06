@@ -1,8 +1,8 @@
 var fs = require('fs')
+var pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'))
+var log = require('ulog')(`${pkg.name}:build`)
 var UglifyJS = require('uglify-js')
 var gzipSize = require('gzip-size')
-var pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'))
-var log = require('anylogger')(`${pkg.name}:build`)
 
 var error
 try {
@@ -18,7 +18,7 @@ try {
   log.info(`Bundled ${srcFile} (${data.length} bytes)`)
 
   data = UglifyJS.minify(data)
-  if (data.error) 
+  if (data.error)
     throw new Error(`Error minifying ${srcFile}: ${data.error.message} at line ${data.error.line} column ${data.error.col}`)
   data = data.code
   log.info(`Minified ${srcFile} (${data.length} bytes)`)
