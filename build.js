@@ -1,30 +1,13 @@
 var fs = require('fs')
 var pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'))
 var log = require('ulog')(`${pkg.name}:build`)
-var UglifyJS = require('uglify-js')
 var gzipSize = require('gzip-size')
 
 var error
 try {
   var v = pkg.version
-  var srcFile = `./${pkg.name}.js`
-
-  var data = fs.readFileSync(srcFile, 'utf8')
-  log.info(`Read ${srcFile} (${data.length} bytes)`)
-
-  data = data.replace('module.exports', `this.${pkg.name}`)
-  data = data.replace(/process\.env\.NODE_ENV != 'production'/g, `false`)
-  data = `(function(){${data}})()`
-  log.info(`Bundled ${srcFile} (${data.length} bytes)`)
-
-  data = UglifyJS.minify(data)
-  if (data.error)
-    throw new Error(`Error minifying ${srcFile}: ${data.error.message} at line ${data.error.line} column ${data.error.col}`)
-  data = data.code
-  log.info(`Minified ${srcFile} (${data.length} bytes)`)
-
   var out = `${pkg.name}.min.js`
-  fs.writeFileSync(out, data, 'utf8')
+  var data = fs.readFileSync(out, 'utf8')
   var gzip = gzipSize.sync(data)
   log.info(`Created ${out} (${data.length} bytes, gzipped ~${gzip} bytes)`)
 
