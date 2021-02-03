@@ -51,12 +51,6 @@ function pipe(ast, tags, rec) {
   return result
 }
 
-// function makeStatic(tag, ctx, rec) {
-//   var result = tag(ctx, rec)
-//   result.toString = result
-//   return result
-// }
-
 pipe.isStatic = function(ast) {
   return ast.reduce(function(r,n){
     return r && ((typeof n == 'string') || (typeof n.tag != 'function') || (n.tag.toString === n.tag))

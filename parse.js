@@ -74,7 +74,10 @@ function next(str, regex, openTag, closeTag) {
   // tags that have open/close markers are parsed
   var esc = false
   var open = 1
-  for (var i=match.index+result.name.length+result.open.length; i<str.length; i++) {
+  var start = match.index+result.name.length+result.open.length
+  if (start == str.length) return
+
+  for (var i=start; i<str.length; i++) {
     var token = str[i]
     if (esc) {
       token = (token == 'n') ? '\n' :

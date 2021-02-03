@@ -13,7 +13,7 @@
 
 ![girly](girly.png)
 
-`kurly` is a tiny ~[1006](#gzip-size) bytes pluggable templating engine for
+`kurly` is a tiny ~[1018](#gzip-size) bytes pluggable templating engine for
 Node and browsers. It can parse templates with tags to abstract syntax trees,
 which it can then compile into functions.
 
@@ -23,7 +23,7 @@ which it can then compile into functions.
 * [kurly.js](https://unpkg.com/kurly@2.0.0-beta.1/kurly.js)
   (fully commented source ~7kB)
 * [kurly.min.js](https://unpkg.com/kurly@2.0.0-beta.1/kurly.min.js)
-  (~[1006](#gzip-size) bytes minified and gzipped)
+  (~[1018](#gzip-size) bytes minified and gzipped)
 
 
 ## CDN

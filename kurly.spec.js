@@ -99,6 +99,11 @@ describe('API', () => {
         ]
         expect(actual).to.containSubset(expected)
       })
+
+      it('when field `optional` is set to true, deals correctly with missing close markers', () => {
+        expect(parse('{oops', { optional: true })).to.be.an('array')
+      })
+
       it('when option fields `open` and `close` are set, allows tags with different open/close markers', () => {
         var actual = parse('a test <string>', { open: '<', close: '>' })
         var expected = [
@@ -363,6 +368,10 @@ describe('API', () => {
 
         it('"a {tag with a closing curly brace \} in it}"', () => {
           expect(() => parse('a {tag with a closing curly brace \} in it}')).to.not.throw()
+        })
+
+        it('"a {tag with a closing curly brace \} in it}" (optional: true)', () => {
+          expect(() => parse('a {tag with a closing curly brace \} in it}', { optional: true })).to.not.throw()
         })
 
         // Call the function! You may supply a context object as the first parameter

@@ -19,11 +19,10 @@ module.exports = {
   },
   devtool: false,
   optimization: {
-    // runtimeChunk: true,
     minimize: true,
     minimizer: [
       new TerserPlugin({
-        extractComments: false,
+        // extractComments: false,
       }),
     ],
   },

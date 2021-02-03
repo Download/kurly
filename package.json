@@ -1,6 +1,6 @@
 {
   "name": "kurly",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "description": "Tiny pluggable templating engine for Node and browsers",
   "main": "./kurly.js",
   "types": "./kurly.d.ts",
@@ -62,10 +62,11 @@
     "chai-subset": "^1.6.0",
     "gzip-size": "^6.0.0",
     "mocha": "^8.2.1",
-    "uglify-js": "^3.12.4",
-    "ulog": "^2.0.0-beta.10",
-    "webpack": "^5.15.0",
-    "webpack-cli": "^4.3.1"
+    "typescript": "^4.1.3",
+    "uglify-js": "^3.12.6",
+    "ulog": "^2.0.0-beta.11",
+    "webpack": "^5.20.1",
+    "webpack-cli": "^4.5.0"
   },
   "dependencies": {
     "anylogger": "^1.0.10"
