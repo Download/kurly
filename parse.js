@@ -1,7 +1,3 @@
-if (process.env.NODE_ENV != 'production') {
-  var log = require('anylogger')('kurly:parse')
-}
-
 /**
  * Parses a string with template tags in it into an abstract syntax tree.
  *
@@ -12,7 +8,6 @@ if (process.env.NODE_ENV != 'production') {
  */
 function parse(str, options) {
   if (process.env.NODE_ENV != 'production') {
-    log.debug.apply(log, [ typeof str == 'string' ? '"' + str + '"' : str ].concat(options ? [ options ] : [ ]))
     if (str && typeof str != 'string') throw new TypeError('`str` is not a string: ' + typeof str)
     if (options && (typeof options != 'object')) throw new TypeError('`options` is not an object: ' + typeof options)
     if (Array.isArray(options)) throw new TypeError('`options` is not an object: array')
@@ -33,9 +28,6 @@ function parse(str, options) {
       result.push(tag)
     }
     if (str) result.push(str)
-  }
-  if (process.env.NODE_ENV != 'production') {
-    log.debug.apply(log, [ '"' + str + '"' ].concat(options ? [ options ] : [ ]).concat([ '=>', JSON.stringify(result) ]))
   }
   return result
 }

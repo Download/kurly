@@ -1,10 +1,6 @@
 var pipe = require('./pipe')
 var tag = require('./tag')
 
-if (process.env.NODE_ENV != 'production') {
-  var log = require('anylogger')('kurly:compile')
-}
-
 /**
  * Compiles an abstract syntax tree into a function
  *
@@ -16,7 +12,6 @@ if (process.env.NODE_ENV != 'production') {
  */
 function compile(ast, tags, rec) {
   if (process.env.NODE_ENV != 'production') {
-    log.debug(ast, tags, rec)
     if ((ast === undefined) || (ast === null)) throw new Error('parameter `ast` is required')
     if (! Array.isArray(ast)) throw new Error('parameter `ast` must be an array')
     if ((tags === undefined) || (tags === null)) throw new Error('parameter `tags` is required')
@@ -26,13 +21,7 @@ function compile(ast, tags, rec) {
     if (Array.isArray(rec)) throw new Error('parameter `rec` must be an object: array')
   }
 
-  var result = tag(pipe(ast, tags, rec), rec)
-
-  if (process.env.NODE_ENV != 'production') {
-    log.debug(ast, tags, rec, '=>', '[Function]')
-  }
-
-  return result;
+  return tag(pipe(ast, tags, rec), rec);
 }
 
 compile.default = compile

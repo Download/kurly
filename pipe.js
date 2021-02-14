@@ -1,10 +1,5 @@
-if (process.env.NODE_ENV != 'production') {
-  var log = require('anylogger')('kurly:pipe')
-}
-
 function pipe(ast, tags, rec) {
   if (process.env.NODE_ENV != 'production') {
-    log.debug(ast, tags, rec)
     if ((ast === undefined) || (ast === null)) throw new Error('parameter `ast` is required')
     if (! Array.isArray(ast)) throw new Error('parameter `ast` must be an array')
     if ((tags === undefined) || (tags === null)) throw new Error('parameter `tags` is required')
@@ -43,11 +38,6 @@ function pipe(ast, tags, rec) {
     }
     return ctx
   })
-
-  if (process.env.NODE_ENV != 'production') {
-    log.debug(ast, tags, rec, '=>', result)
-  }
-
   return result
 }
 
